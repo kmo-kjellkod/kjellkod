@@ -1,0 +1,124 @@
+<resources>
+    <string name="app_name">Skorsten</string>
+    <string name="action_settings">Settings</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+
+    <string name="provider_settings_message">Your GPS seems to be disabled, do you want to enable it?</string>
+    <string name="provider_settings_yes">Yes</string>
+    <string name="provider_settings_no">No</string>
+
+    <string name="battery_title">Batteritest</string>
+    <string name="battery_text">Anslut fläkten</string>
+    <string name="battery_button_start">Start av batteritest</string>
+    <string name="battery_button_stop">Stopp av batteritest</string>
+    <string name="battery_text_ok">Batteriet är bra</string>
+    <string name="battery_text_not_ok">Batteriet behöver laddas</string>
+    <string name="battery_button_snackbar_stop">Stopp</string>
+    <string name="battery_button_snackbar_text">Batteritest pågår</string>
+
+
+    <string name="extra_title">Innehåll Extra</string>
+    <string name="extra_button11">Inställningar</string>
+    <string name="extra_button12">Blåtand</string>
+    <string name="extra_button21">Email</string>
+    <string name="extra_button22">GPS</string>
+    <string name="extra_button31">-</string>
+    <string name="extra_button32">-</string>
+    <string name="extra_button41">-</string>
+    <string name="extra_button42">-</string>
+
+    <string name="house_property_title">Fastighet</string>
+    <string name="house_property_id">Fastighetsbeteckning</string>
+    <string name="house_property_sweep">Sotare</string>
+
+    <string name="info_title">Information</string>
+    <string name="info_renifoam">RENIFOAM AB</string>
+    <string name="info_mobile">Mobil:\u0020</string>
+    <string name="info_telephone">Telefon:\u0020</string>
+    <string name="info_mobile_number">0705171635</string>
+    <string name="info_telephone_number">013101635</string>
+
+    <string name="leaks_measure_title">Läckage-Mätning</string>
+    <string name="leaks_measure_start">Start</string>
+    <string name="leaks_measure_measure_data">Rökkanalen</string>
+    <string name="leaks_measure_measure_underway">Mätning pågår</string>
+    <string name="leaks_measure_measure_finished">Mätning klart</string>
+    <string name="leaks_measure_measure_pressure">Tryck:\u0020</string>
+    <string name="leaks_measure_measure_flow">Flöde:\u0020</string>
+    <string name="leaks_measure_stop">Stopp</string>
+    <string name="leaks_measure_rchannel">Rektangulär rökkanal</string>
+    <string name="leaks_measure_cchannel">Rund rökkanal</string>
+    <string name="leaks_measure_rcchannel">Både rektangulär och rund rökkanal</string>
+
+    <string name="leaks_rect_title">Fyrkantigt rökkanal</string>
+    <string name="leaks_rect_pressure">Tryck:\u0020</string>
+    <string name="leaks_rect_side_a">Sida A:\u0020</string>
+    <string name="leaks_rect_side_b">Sida B:\u0020</string>
+    <string name="leaks_rect_length">Längd:\u0020</string>
+    <string name="leaks_rect_start">Gå till mätning</string>
+
+    <string name="leaks_circle_title">Rund rökkanal</string>
+    <string name="leaks_circle_pressure">Tryck:\u0020</string>
+    <string name="leaks_circle_radius">Radie\u0020</string>
+    <string name="leaks_circle_length">Längd:\u0020</string>
+    <string name="leaks_circle_start">Gå till mätning</string>
+
+    <string name="main_title">Innehåll</string>
+    <string name="main_button11">Läckage</string>
+    <string name="main_button12">Läckage</string>
+    <string name="main_button21">Provtryckning</string>
+    <string name="main_button22">Manuell</string>
+    <string name="main_button31">Batteritest</string>
+    <string name="main_button32">Fastighet</string>
+    <string name="main_button41">Info</string>
+    <string name="main_button42">Extra</string>
+
+
+    <string name="manual_title">Manuell</string>
+    <string name="manual_actuator">Fläktmotor</string>
+    <string name="manual_pressure">Tryck</string>
+    <string name="manual_flow">Flöde</string>
+    <string name="manual_button_start">Start</string>
+    <string name="manual_button_stop">Stopp</string>
+    <string name="manual_button_snackbar_stop">Stopp</string>
+    <string name="manual_button_snackbar_text">Manuell styrning pågår</string>
+
+
+    <string name="pressure_title">Provtryckning</string>
+    <string name="pressure_length">Längd</string>
+    <string name="pressure_actuator">Fläktmotor</string>
+    <string name="pressure_pressure">Ttyck</string>
+
+    <string name="settings_title">Inställningar</string>
+
+
+    <string name="gps_title">GPS</string>
+    <string name="gps_pretext">General Positioning System</string>
+    <string name="gps_latitude">Latitud: </string>
+    <string name="gps_longitude">Longitud: </string>
+    <string name="gps_button_read">LÄS</string>
+    <string name="gps_button_save_to_file">Spara till fil</string>
+    <string name="gps_button_read_from_file">Läs från fil</string>
+    <string name="gps_action">GPS</string>
+
+    <string name="bt_title">Bluetooth</string>
+    <string name="bt_pretext_paired_devices">Bluetooth Paired Devices</string>
+    <string name="bt_action">Bluetooth</string>
+    <string name="bt_send">Send</string>
+    <string name="bt_received">Received</string>
+
+    <string name="btc_title">Seriell kommunikation</string>
+    <string name="bt_pretext_serial_communication">Bluetooth Communication</string>
+
+    <string name="pdf_title">PDF</string>
+    <string name="pdf_pretext">PDF</string>
+    <string name="button_pdf_test">Test PDF</string>
+
+    <string name="email_title">EMAIL</string>
+    <string name="email_pretext">Send email</string>
+    <string name="email_send">kjellkod.kurs@gmail.com</string>
+
+    <string name="title">Ej definierad titel</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

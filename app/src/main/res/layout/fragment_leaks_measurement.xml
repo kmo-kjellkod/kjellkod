@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!--Three image buttons-->
+    <LinearLayout
+        android:id="@+id/radio_group_meas"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/btn_measure_rect"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="2dp"
+            android:layout_marginRight="2dp"
+            android:layout_weight="1"
+            android:src="@mipmap/rectangle" />
+
+
+        <ImageButton
+            android:id="@+id/btn_measure_circle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="2dp"
+            android:layout_marginRight="2dp"
+            android:layout_weight="1"
+            android:src="@mipmap/circle" />
+
+
+        <ImageButton
+            android:id="@+id/btn_measure_rect_circle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="2dp"
+            android:layout_marginRight="2dp"
+            android:layout_weight="1"
+            android:src="@mipmap/rectangle_circle" />
+        />
+    </LinearLayout>
+
+    <!--Button-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/buttonLeaksStartMeasure"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="10dp"
+                android:background="@color/blueNavy"
+                android:textColor="@color/whiteSmoke"
+                android:text="@string/leaks_measure_start"
+                android:textSize="24sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0" />
+
+            <TextView
+                android:id="@+id/textViewLeakageMeasurementOn"
+                android:layout_width="368dp"
+                android:layout_height="276dp"
+                android:layout_marginBottom="8dp"
+                android:text="-"
+                android:textAppearance="@android:style/TextAppearance.Material.Medium"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/buttonLeaksStartMeasure"
+                app:layout_constraintVertical_bias="0.935" />
+
+
+        </android.support.constraint.ConstraintLayout>
+    </LinearLayout>
+
+    <!--Save/emailbuttons-->
+    <LinearLayout
+        android:id="@+id/btns_measure_save_email"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_measure_save"
+            android:layout_width="wrap_content"
+            android:layout_weight="0.5"
+            android:layout_height="wrap_content"
+            android:background="@color/blueNavy"
+            android:textColor="@color/whiteSmoke"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:text="Spara"
+            android:visibility="invisible"/>
+        <Button
+            android:id="@+id/btn_measure_email"
+            android:layout_width="wrap_content"
+            android:layout_weight="0.5"
+            android:layout_height="wrap_content"
+            android:background="@color/blueNavy"
+            android:textColor="@color/whiteSmoke"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:text="Email"
+            android:visibility="invisible"/>
+
+    </LinearLayout>
+
+
+</LinearLayout>

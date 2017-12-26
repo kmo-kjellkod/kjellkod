@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context="com.doffs.skorsten.MainActivity$FragmentExtra">
+
+
+    <!--parent container-->
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        android:layout_weight="0.8"
+        <!--child container-->
+        <!--each horizontal layout gets 1/4 of remaining space-->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_weight="0.4"
+            android:layout_height="match_parent">
+
+            <Button
+                android:id="@+id/extra_button11"
+                android:background="@color/greySlate1"
+                android:layout_width="fill_parent"
+                android:layout_weight="0.4"
+                android:layout_height="fill_parent"
+                android:text="@string/extra_button11"
+                android:textColor="@color/white"
+                />
+            <View
+                android:layout_width="10dp"
+                android:layout_height="0dp" />
+
+            <Button
+                android:id="@+id/extra_button12"
+                android:background="@color/greySlate2"
+                android:layout_width="fill_parent"
+                android:layout_weight="0.4"
+                android:layout_height="fill_parent"
+                android:text="@string/extra_button12"
+                android:textColor="@color/white"
+                />
+
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="10dp"/>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_weight="0.4"
+            android:layout_height="match_parent">
+
+            <Button
+                android:id="@+id/extra_button21"
+                android:background="@color/greySlate3"
+                android:layout_width="fill_parent"
+                android:layout_weight="0.4"
+                android:layout_height="fill_parent"
+                android:text="@string/extra_button21"
+                android:textColor="@color/white"
+                />
+            <View
+                android:layout_width="10dp"
+                android:layout_height="0dp" />
+
+            <Button
+                android:id="@+id/extra_button22"
+                android:background="@color/greySlate4"
+                android:layout_width="fill_parent"
+                android:layout_weight="0.4"
+                android:layout_height="fill_parent"
+                android:text="@string/extra_button22"
+                android:textColor="@color/white"
+                />
+
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="10dp"/>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_weight="0.4"
+            android:layout_height="match_parent">
+            <Button
+                android:id="@+id/extra_button31"
+                android:background="@color/greySilver"
+                android:layout_width="fill_parent"
+                android:layout_weight="0.4"
+                android:layout_height="fill_parent"
+                android:text="@string/extra_button31"
+                />
+            <View
+                android:layout_width="10dp"
+                android:layout_height="0dp" />
+            <Button
+                android:id="@+id/extra_button32"
+                android:background="@color/greyDim"
+                android:layout_width="fill_parent"
+                android:layout_weight="0.4"
+                android:layout_height="fill_parent"
+                android:text="@string/extra_button32"
+                />
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="10dp"/>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_weight="0.4"
+            android:layout_height="match_parent">
+            <Button
+                android:id="@+id/extra_button41"
+                android:background="@color/greySlateDark"
+                android:layout_width="fill_parent"
+                android:layout_weight="0.4"
+                android:layout_height="fill_parent"
+                android:text="@string/extra_button41"
+                />
+            <View
+                android:layout_width="10dp"
+                android:layout_height="0dp" />
+            <Button
+                android:id="@+id/extra_button42"
+                android:background="@color/grey72"
+                android:layout_width="fill_parent"
+                android:layout_weight="0.4"
+                android:layout_height="fill_parent"
+                android:allowUndo="false"
+                android:text="@string/extra_button42"
+                />
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="50dp"/>
+
+        <!-- Just for spacing-->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="10dp">
+        </RelativeLayout>
+    </LinearLayout>
+
+
+</LinearLayout>
