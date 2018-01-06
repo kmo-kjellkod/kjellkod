@@ -21,14 +21,17 @@
         style="@style/Widget.AppCompat.EditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/whiteSmoke"
+        android:background="@color/whiteIvory2"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:textSize="@dimen/dimension_h1"
         android:inputType="text"
         app:layout_constraintTop_toBottomOf="@+id/textViewHousePropertySweeper"
         tools:layout_editor_absoluteX="0dp" />
 
     <TextView
         android:id="@+id/textViewHousePropertyId"
-        android:layout_width="368dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:text="@string/house_property_id"
@@ -40,6 +43,10 @@
         style="@style/Widget.AppCompat.EditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/whiteIvory2"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:textSize="@dimen/dimension_h1"
         android:inputType="text"
         app:layout_constraintTop_toBottomOf="@+id/textViewHousePropertyId"
         tools:layout_editor_absoluteX="0dp" />

@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
 
 public class Settings {
 
+    public String Company = "Acme Ltd";
     public String Sweeper = "Kalle Anka";
     public String HousePropertyId = "Fastighetsbeteckning";
     public String Bluetooth_Mac = "AC:B5:7D:A4:2C:6F";
@@ -50,6 +51,7 @@ public class Settings {
             }
         } catch(Exception e) {
             Log.e("doff-file", e.getMessage());
+            e.printStackTrace();
         }
 
 
@@ -66,6 +68,7 @@ public class Settings {
             }
         } catch (Exception e) {
             Log.e("doff-file", e.getMessage());
+            e.printStackTrace();
         }
     }
 

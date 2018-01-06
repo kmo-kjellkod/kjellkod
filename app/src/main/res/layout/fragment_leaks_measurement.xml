@@ -57,11 +57,13 @@
 
             <Button
                 android:id="@+id/buttonLeaksStartMeasure"
+                android:background="@drawable/buttonshape_a"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_marginLeft="10sp"
+                android:layout_marginRight="10sp"
+                android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:layout_marginTop="10dp"
-                android:background="@color/blueNavy"
                 android:textColor="@color/whiteSmoke"
                 android:text="@string/leaks_measure_start"
                 android:textSize="24sp"

@@ -30,6 +30,8 @@ public class Protocol {
     public  final String Rx_s = "s"; //Sensor signals received: "s <pressure><blank><flow>\n"
     public  final String Rx_a = "a"; //Lll signals received : "a <motor><blank><pressure><blank><flow>\n"
 
+    public  final String Tx_T = "T"; //Pressure test
+
     public  void txQuit() {
         bt.send(Tx_Q + "\n");
     }
@@ -39,6 +41,10 @@ public class Protocol {
     }
     public  boolean txBatteryStatus() {
         return bt.send(Tx_b + "\n");
+    }
+
+    public  boolean txPessureTest() {
+        return bt.send(Tx_T + "\n");
     }
 
     public  boolean txLeakageMeasure(int pressure) {

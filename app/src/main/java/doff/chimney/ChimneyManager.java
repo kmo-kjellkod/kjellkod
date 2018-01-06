@@ -20,6 +20,7 @@ import doff.bt.Bluetooth;
 import doff.bt.Protocol;
 import doff.file.FileManager;
 import doff.file.Settings;
+import doff.gps.GPS;
 
 import static doff.chimney.ChimneyManager.State.Idle;
 
@@ -30,6 +31,7 @@ public class ChimneyManager {
         Leakage,
         BatteryTest,
         Manual,
+        PressureTest,
 
     }
     public State state = Idle;
@@ -46,6 +48,8 @@ public class ChimneyManager {
     }
     public boolean isStateManual() { return state == State.Manual; }
     public void setStateManual() { state=State.Manual;}
+    public boolean isPressureTest() { return state == State.PressureTest; }
+    public void setStatePressureTest() { state=State.PressureTest;}
 
     private String space = "   ";
 
@@ -65,6 +69,7 @@ public class ChimneyManager {
         manualControl = new ManualControl(activity);
         pressureTest = new PressureTest(activity);
         houseProperty = new HouseProperty(activity,settings);
+        gps = new GPS(activity);
     }
 
     private MainActivity activity=null;
@@ -75,7 +80,7 @@ public class ChimneyManager {
 
     public Actuators actuators = new Actuators();
     public Sensors sensors = new Sensors();
-
+    public GPS gps = null;
 
     public Settings settings = null;
     public void settings2file() {
@@ -89,6 +94,7 @@ public class ChimneyManager {
             FileManager.WriteReadableExternalStorage(activity,fileName,json);
         } catch (Exception e) {
             Log.d("doff-file","exception=" + e.getMessage());
+            e.printStackTrace();
         }
         Log.d("doff-file","write settingsfile done");
 
@@ -108,6 +114,7 @@ public class ChimneyManager {
                 Log.d("doff-file", "file2settings: settings: " + settings.Bluetooth_Mac);
             } catch (Exception e) {
                 Log.e("doff-file", e.getMessage());
+                e.printStackTrace();
             }
         }
     }

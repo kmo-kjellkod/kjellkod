@@ -8,8 +8,10 @@
     <Button
         android:id="@+id/buttonManualStart"
         android:layout_width="match_parent"
+        android:layout_marginLeft="10sp"
+        android:layout_marginRight="10sp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="10sp"
         android:text="Start"
         android:textColor="@color/whiteSmoke"
         app:layout_constraintEnd_toEndOf="parent"

@@ -26,6 +26,7 @@ import android.text.SpannableStringBuilder;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Range;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,14 +37,16 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ImageButton;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -53,11 +56,14 @@ import doff.chimney.Chimney;
 import doff.chimney.ChimneyManager;
 import doff.chimney.HouseProperty;
 import doff.chimney.ManualControl;
+import doff.chimney.PressureTest;
 import doff.chimney.Sensors;
-import doff.gps.LocationTracker;
+import doff.file.FileManager;
+import doff.file.PdfRender;
+import doff.file.Settings;
+import doff.gps.GPS;
 import doff.bt.Bluetooth;
 import doff.email.GMailSend;
-import doff.file.FileManager;
 import doff.file.Pdf;
 
 /**
@@ -66,7 +72,8 @@ import doff.file.Pdf;
 
 public class MainActivity extends AppCompatActivity implements Bluetooth.CommunicationCallback , FragmentFirst.OnFragmentInteractionListener {
 
-    private static MainActivity self = null;
+    public static MainActivity self = null;
+
     private static int PageMain = 0;
     private static int PageLeakageRectangle = 1;
     private static int PageLeakageCircle = 2;
@@ -78,11 +85,12 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
     private static int PageManual = 8;
     private static int PageHouseProperty = 9;
     private static int PageExtra = 10;
-    private static int PageGPS = PageExtra+1;
-    private static int PageBluetoothPaired = PageExtra+2;
-    private static int PageBluetoothCom = PageExtra+3;
-    private static int PagePdf = PageExtra+4;
-    private static int PageEmail = PageExtra+5;
+    private static int PageGPS = 11;
+    private static int PageBluetoothPaired = 12;
+    private static int PageBluetoothCom = 13;
+    private static int PagePdf = 14;
+    private static int PageEmail = 15;
+    private static int PageFiles = 16;
 
     private ChimneyManager chimneyManager = new ChimneyManager(this);
     private ChimneyThread chimneyThread = null;
@@ -146,7 +154,9 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
             super.handleMessage(msg);
         }
     };
+    //@todo Lägg till handler för pressureTest
 
+    private FragmentPDF fragmentPDF = null;
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
@@ -174,8 +184,6 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
 
     private FloatingActionButton fabCompass = null;
 
-    private LocationTracker tracker = null;
-    private String latitudeLongitude = "";
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -193,7 +201,6 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
         setSupportActionBar(toolbar);
 
         MainActivity.self = this; //20171104
-        tracker=new LocationTracker(this);
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         mViewPager = (ViewPager) findViewById(R.id.container);
@@ -241,6 +248,18 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
         actionBar.setTitle("");
         actionBar.setIcon(R.mipmap.ic_launcher);
     }
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            //do whatever you need for the hardware 'back' button
+            if ( mViewPager.getCurrentItem() != 0 )
+            {
+                mViewPager.setCurrentItem(0);
+            }
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 
     @Override public void onConnect(BluetoothDevice device) {
 
@@ -276,7 +295,7 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
         }
 
         @Override public void setPrimaryItem (ViewGroup container, int position, Object object) {
-            Log.d("doff-main","SectionsPagerAdapter.setPrimaryItem ");
+            Log.d("doff-main","SectionsPagerAdapter.setPrimaryItem "+position);
             Message msg = handlerFragments.obtainMessage();
             msg.what = MainActivity.MESSAGE_FRAGMENT;
             msg.obj = "title";
@@ -284,15 +303,16 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
         }
         @Override public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
-            Log.d("doff-main","SectionsPagerAdapter.getItem ");
+            Log.d("doff-main","SectionsPagerAdapter.getItem "+position);
 
             Fragment fragment = null;
             int p=0;
             if (position == p++) {
                 fragment = FragmentMain.newInstance(position + 1); //0
             }
-            else if (position == p++)
+            else if (position == p++) {
                 fragment = FragmentLeaksRectangle.newInstance(position + 1); // 1
+            }
             else if (position == p++)
                 fragment = FragmentLeaksCircle.newInstance(position + 1); // 2
             else if (position == p++)
@@ -319,16 +339,19 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
                 fragment = FragmentBluetoothSerialCommunication.newInstance(position + 1,MainActivity.self.chimneyManager.bluetooth);
             else if (position == p++)
                 fragment = FragmentPDF.newInstance(position + 1);
-            else
+            else  if (position == p++)
                 fragment = FragmentEmail.newInstance(position + 1);
-
+            else  if (position == p++)
+                fragment = FragmentFiles.newInstance(position + 1);
+            else
+                return null;
 
             vectorFragment.set(position, fragment);
             return fragment;
         }
         @Override public int getCount() {
             // Show 3 total pages.
-            return 14;
+            return 17;
         }
     }
     public void restartApp() {
@@ -525,7 +548,7 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
                 Range r = MainActivity.self.chimneyManager.chimney.rangeSide;
                 int sbar = MainActivity.self.chimneyManager.chimney.value2seekBar(r,v);
                 seekBarSideA.setProgress(sbar);
-                textViewSideA.setText(getString(R.string.leaks_rect_side_a)+ v + " mm");
+                textViewSideA.setText(getString(R.string.leaks_rect_side_a)+ v + " mmv");
             }
 
             if (textViewSideB != null) {
@@ -533,7 +556,7 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
                 Range r = MainActivity.self.chimneyManager.chimney.rangeSide;
                 int sbar = MainActivity.self.chimneyManager.chimney.value2seekBar(r,v);
                 seekBarSideB.setProgress(sbar);
-                textViewSideB.setText(getString(R.string.leaks_rect_side_b)+ v + " mm");
+                textViewSideB.setText(getString(R.string.leaks_rect_side_b)+ v + " mmv");
             }
 
             if (textViewLength != null) {
@@ -588,7 +611,7 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
                 @Override public void onProgressChanged(SeekBar seekBar, int progress,boolean fromUser) {
                     // TODO Auto-generated method stub
                     int value = MainActivity.self.chimneyManager.chimney.setSideA(progress);
-                    textViewSideA.setText(getString(R.string.leaks_rect_side_a)+ value + " mm");
+                    textViewSideA.setText(getString(R.string.leaks_rect_side_a)+ value + " mmv");
                     //Toast.makeText((MainActivity.self, String.valueOf(progress),Toast.LENGTH_LONG).show();
 
                 }
@@ -606,7 +629,7 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
                 @Override public void onProgressChanged(SeekBar seekBar, int progress,boolean fromUser) {
                     // TODO Auto-generated method stub
                     int value = MainActivity.self.chimneyManager.chimney.setSideB(progress);
-                    textViewSideB.setText(getString(R.string.leaks_rect_side_b)+ value + " mm");
+                    textViewSideB.setText(getString(R.string.leaks_rect_side_b)+ value + " mmv");
                     //Toast.makeText((MainActivity.self, String.valueOf(progress),Toast.LENGTH_LONG).show();
 
                 }
@@ -672,7 +695,7 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
                 Range r = MainActivity.self.chimneyManager.chimney.rangeSide;
                 int sbar = MainActivity.self.chimneyManager.chimney.value2seekBar(r,v);
                 seekBarRadius.setProgress(sbar);
-                textViewRadius.setText(getString(R.string.leaks_circle_radius)+ v + " mm");
+                textViewRadius.setText(getString(R.string.leaks_circle_radius)+ v + " mmv");
             }
 
             if (textViewLength != null) {
@@ -727,7 +750,7 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
                 @Override public void onProgressChanged(SeekBar seekBar, int progress,boolean fromUser) {
                     // TODO Auto-generated method stub
                     int value = MainActivity.self.chimneyManager.chimney.setRadius(progress);
-                    textViewRadius.setText(getString(R.string.leaks_circle_radius)+ value + " mm");
+                    textViewRadius.setText(getString(R.string.leaks_circle_radius)+ value + " mmv");
                     //Toast.makeText((MainActivity.self, String.valueOf(progress),Toast.LENGTH_LONG).show();
 
                 }
@@ -799,7 +822,6 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
         @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             final View rootView = inflater.inflate(R.layout.fragment_leaks_measurement, container, false);
 
-
             toggleButtonRect = (ImageButton) rootView.findViewById(R.id.btn_measure_rect);
             toggleButtonRectCircle = (ImageButton) rootView.findViewById(R.id.btn_measure_rect_circle);
             toggleButtonCircle = (ImageButton) rootView.findViewById(R.id.btn_measure_circle);
@@ -814,6 +836,8 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
                     @Override
                     public void onClick(View view) {
                         if ( MainActivity.self.chimneyManager.chimney.SaveMeasurementResult() ) {
+                            String fileName = MainActivity.self.chimneyManager.settings.HousePropertyId+".pdf";
+                            Pdf.lmd2pdf(MainActivity.self, fileName, MainActivity.self.chimneyManager.chimney.lmd);
                             Toast toast = Toast.makeText(MainActivity.self, "Save measurement result", Toast.LENGTH_SHORT);
                             toast.show();
                         } else {
@@ -843,7 +867,7 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
                     private long deltaTime = 1000;
                     @Override
                     public void onClick(View view) {
-                        Chimney chimney = MainActivity.self.chimneyManager.chimney;
+                        ChimneyManager cm = MainActivity.self.chimneyManager;
 
                         if (countDownTimer == null) {
                             buttonSave.setVisibility(View.INVISIBLE);
@@ -851,9 +875,9 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
                             buttonStart.setText(getText(R.string.leaks_measure_measure_underway));
                             buttonStart.setEnabled(false);
                             buttonStart.setBackgroundColor(getResources().getColor(R.color.greySlate1,null));
-                            chimney.leakLmdInit();
-                            int pressure = chimney.pressure;
-                            MainActivity.self.chimneyManager.protocol.txLeakageMeasure(pressure);
+                            cm.chimney.leakLmdInit();
+                            int pressure = cm.chimney.pressure;
+                            cm.protocol.txLeakageMeasure(pressure);
                             countDownTimer = new CountDownTimer(endTime, deltaTime) {
                                 @Override
                                 public void onTick(long l) {
@@ -1048,7 +1072,7 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
         public FragmentExtra() {}
 
         public static FragmentExtra newInstance(int sectionNumber) {
-            Log.d("doff-pdf","New fragment.");
+            Log.d("doff-extra","New fragment.");
             final FragmentExtra fragment = new FragmentExtra();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
@@ -1091,8 +1115,6 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
             button21 = (Button) rootView.findViewById(R.id.extra_button21);
             if (button21 != null) {
                 Log.d("doff-main","Create button listener: FragmentMain button21");
-                //buttonReadGPS.getBackground().setColorFilter(0xFFFF0000, PorterDuff.Mode.MULTIPLY);
-
                 button21.setOnClickListener( new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -1126,8 +1148,9 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
                 button31.setOnClickListener( new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Toast toast = Toast.makeText(MainActivity.self, "button31", Toast.LENGTH_SHORT);
-                        toast.show();
+                        MainActivity.self.mViewPager.setCurrentItem(MainActivity.PagePdf);
+                        //Toast toast = Toast.makeText(MainActivity.self, "button31", Toast.LENGTH_SHORT);
+                        //toast.show();
                     }
                 });
             }
@@ -1140,8 +1163,9 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
                 button32.setOnClickListener( new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Toast toast = Toast.makeText(MainActivity.self, "button32", Toast.LENGTH_SHORT);
-                        toast.show();
+                        MainActivity.self.mViewPager.setCurrentItem(MainActivity.PageFiles);
+                        //Toast toast = Toast.makeText(MainActivity.self, "button32", Toast.LENGTH_SHORT);
+                        //toast.show();
                     }
                 });
             }
@@ -1194,7 +1218,7 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
                         ,"Text11","Text12","Text13","Text14","Text15"
                         ,"Text16","Text17","Text18","Text19","Text20"
                         ,"Text21","Text22","Text23","Text24"};
-        //private static String[] arrTemp;
+        //private static String[] arrayColumn1;
         private static String[] arrTemp =
                 new String[]{"Text1","Text2","Text3","Text4"
                         ,"Text5","Text6","Text7","Text8","Text9","Text10"
@@ -1267,9 +1291,6 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
 
 
         }
-
-
-
     }
     public static class FragmentInfo extends Fragment implements IChimney {
         public String title() { return getString(R.string.info_title); }
@@ -1406,10 +1427,37 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
         public void init() {}
         private static final String ARG_SECTION_NUMBER = "section_number";
 
-        TextView textViewInfo = null;
+        private View rootView;
+        private ChimneyManager chimneyManager = MainActivity.self.chimneyManager;
+        private PressureTest pressureTest = MainActivity.self.chimneyManager.pressureTest;
+        private Button buttonStart = null;
+        private TextView textViewLength= null;
+        private SeekBar  seekBarLength  = null;
+        private TextView textViewPressure = null;
+        private TextView textViewFanMotor = null;
+        private Snackbar snackbar = null;
 
         public FragmentPressure() {}
+        public void showSnackbar(View view, String message)  {
+            // Create snackbar
+            snackbar = Snackbar.make(view, message, Snackbar.LENGTH_INDEFINITE);
 
+            // Set an action on it, and a handler
+            snackbar.setAction(MainActivity.self.getString(R.string.pressure_button_snackbar_stop), new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ChimneyManager cm =  MainActivity.self.chimneyManager;
+                    snackbar.dismiss();
+                    if ( cm.isPressureTest() ) {
+                        cm.setStateIdle();
+                        buttonStart.setText(R.string.pressure_button_start);
+                        buttonStart.setBackgroundColor(getResources().getColor(R.color.blueRoyal,null));
+                    }
+                }
+            });
+
+            snackbar.show();
+        }
         public static FragmentPressure newInstance(int sectionNumber) {
             FragmentPressure fragment = new FragmentPressure();
             Bundle args = new Bundle();
@@ -1419,9 +1467,56 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
         }
 
         @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_pressure, container, false);
+            this.rootView = inflater.inflate(R.layout.fragment_pressure, container, false);
 
-            return rootView;
+            textViewLength = (TextView) rootView.findViewById(R.id.textViewPressureLength);
+            textViewLength.setText(pressureTest.BuildTextLength());
+
+            seekBarLength = (SeekBar) rootView.findViewById(R.id.seekBarPressureLength);
+            seekBarLength.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onStopTrackingTouch(SeekBar seekBar) {
+                    // TODO Auto-generated method stub
+                }
+                @Override public void onStartTrackingTouch(SeekBar seekBar) {
+                    // TODO Auto-generated method stub
+                }
+                @Override public void onProgressChanged(SeekBar seekBar, int progress,boolean fromUser) {
+                    // TODO Auto-generated method stub
+                    double value = pressureTest.setLength(progress);
+                    textViewLength.setText(pressureTest.BuildTextLength());
+                    if ( MainActivity.self.chimneyManager.isPressureTest() ) {
+                        //MainActivity.self.chimneyManager.protocol.txPessureTest((int) value);
+                    }
+                }
+            });
+
+            textViewPressure = (TextView) rootView.findViewById(R.id.textViewPressurePressure);
+            textViewPressure.setText(pressureTest.BuildTextPressure(0.0));
+
+            textViewFanMotor = (TextView) rootView.findViewById(R.id.textViewPressureFanMotor);
+            textViewFanMotor.setText(pressureTest.BuildTextFanMotor(0));
+
+            buttonStart = (Button) rootView.findViewById(R.id.buttonPressureStart);
+            buttonStart.setText(R.string.pressure_button_start);
+            buttonStart.setBackgroundColor(getResources().getColor(R.color.blueNavy, null));
+            buttonStart.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (MainActivity.self.chimneyManager.isStateIdle()) {
+                        MainActivity.self.chimneyManager.setStateManual();
+                        buttonStart.setText(R.string.manual_button_stop);
+                        buttonStart.setBackgroundColor(getResources().getColor(R.color.greySlate1, null));
+                        chimneyManager.setStatePressureTest();
+                        showSnackbar(rootView, MainActivity.self.getString(R.string.pressure_button_snackbar_text));
+                    } else {
+                        MainActivity.self.chimneyManager.setStateIdle();
+                        buttonStart.setText(R.string.manual_button_start);
+                        buttonStart.setBackgroundColor(getResources().getColor(R.color.blueRoyal, null));
+                        snackbar.dismiss();
+                    }
+                }
+            });
+            return this.rootView;
         }
     }
     public static class FragmentHouseProperty extends Fragment implements IChimney {
@@ -1449,20 +1544,55 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
             View rootView = inflater.inflate(R.layout.fragment_house_property, container, false);
 
             HouseProperty hp = MainActivity.self.chimneyManager.houseProperty;
+            final Settings settings = MainActivity.self.chimneyManager.settings;
 
             textViewSweeper = (TextView) rootView.findViewById(R.id.textViewHousePropertySweeper);
             textViewSweeper.setText(hp.BuildTextSweeper());
+
             editTextSweeper = (EditText) rootView.findViewById(R.id.editTextHousePropertySweeper);
+            editTextSweeper.setText(settings.Sweeper);
+            editTextSweeper.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    settings.Sweeper = editable.toString();
+                }
+            });
 
             textViewId = (TextView) rootView.findViewById(R.id.textViewHousePropertyId);
             textViewId.setText(hp.BuildTextId());
-            editTextId = (EditText) rootView.findViewById(R.id.editTextHousePropertyId);
 
+            editTextId = (EditText) rootView.findViewById(R.id.editTextHousePropertyId);
+            editTextId.setText(settings.HousePropertyId);
+            editTextId.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    settings.HousePropertyId = editable.toString();
+                }
+            });
 
             return rootView;
         }
     }
-
     public static class FragmentBluetoothPairedDevices extends Fragment  implements IChimney {
         public String title() { return getString(R.string.bt_title); }
         public void init() {}
@@ -1496,6 +1626,7 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
             btPairedDevicesList = MainActivity.self.chimneyManager.bluetooth.getPairedDevices();
             Log.d("doff-bt", "btPairedDevicesList:"+btPairedDevicesList.toString());
 
+            itemsAdapter.clear();
             for (BluetoothDevice bd : btPairedDevicesList) {
                 String deviceName = bd.getName();
                 String deviceMacAddress = bd.getAddress();
@@ -1527,8 +1658,6 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
             if (buttonPairedDevices != null) {
                 Log.d("doff-bt","Create button listener.");
                 //buttonReadGPS.getBackground().setColorFilter(0xFFFF0000, PorterDuff.Mode.MULTIPLY);
-                buttonPairedDevices.setBackgroundColor(0xFF0000FF);
-                buttonPairedDevices.setTextColor(0xFFFFFFFF);
                 buttonPairedDevices.setOnClickListener( new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -1541,8 +1670,6 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
             buttonConnectBT = (Button) rootView.findViewById(R.id.button_bt_connect);
             if (buttonConnectBT != null) {
                 Log.d("doff-bt","Create button listener.");
-                buttonConnectBT.setBackgroundColor(0xFF0000FF);
-                buttonConnectBT.setTextColor(0xFFFFFFFF);
                 buttonConnectBT.setOnClickListener( new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -1638,10 +1765,16 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
 
         private static final String ARG_SECTION_NUMBER = "section_number";
 
-        private  TextView textViewHeader = null;
-        private Button buttonTest = null;
+        private String[] fileNames = null;
+        int index = 0;
+        private Button buttonPlus = null;
+        private Button buttonMinus = null;
+        private Button buttonHome = null;
+        private TextView textViewFileName = null;
+        private ImageView imageView = null;
 
         public FragmentPDF() {
+            MainActivity.self.fragmentPDF = this;
         }
 
         public static FragmentPDF newInstance(int sectionNumber) {
@@ -1657,43 +1790,63 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_create_pdf, container, false);
+            fileNames = FileManager.listAllPdfFileNamesInExternalDirectory(MainActivity.self);
 
+            textViewFileName = (TextView) rootView.findViewById(R.id.textViewPdfFileName);
 
-            this.textViewHeader = (TextView) rootView.findViewById(R.id.pdf_pretext);
-            if ( textViewHeader != null ) {
-                this.textViewHeader.setText(getString(R.string.pdf_pretext));
-            }
-
-            buttonTest = (Button) rootView.findViewById(R.id.button_pdf_test);
-            if (buttonTest != null) {
+            buttonPlus = (Button) rootView.findViewById(R.id.button_pdf_plus);
+            if (buttonPlus != null) {
                 Log.d("doff-pdf","Create button listener.");
-                //buttonReadGPS.getBackground().setColorFilter(0xFFFF0000, PorterDuff.Mode.MULTIPLY);
-                buttonTest.setBackgroundColor(0xFF0000FF);
-                buttonTest.setTextColor(0xFFFFFFFF);
-                buttonTest.setOnClickListener( new View.OnClickListener() {
+
+                buttonPlus.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        String fileName = FileManager.fileNameWithDate("test.pdf");
-                        File fileDir1 = MainActivity.self.getFilesDir();
-                        File fileDir2 = MainActivity.self.getExternalFilesDir(null);
-                        Pdf.data2pdf(MainActivity.self, "pdftest.pdf");
-                        File file11 = new File(fileDir1, "pdftest.pdf");
-                        File file12 = new File(fileDir1, "position.txt");
-                        File file21 = new File(fileDir1, "pdftest.pdf");
-                        File file22 = new File(fileDir2, "position.txt");
-
-                        Log.d("doff-pdf","getExternalFilesDir: "+ MainActivity.self.getExternalFilesDir(null).toString());
-
-                        Log.d("doff-pdf","External pdftest.pdf exists: "+ file21.exists());
-                        Log.d("doff-pdf","Internal position.txt exists: "+ file12.exists());
-                        Log.d("doff-pdf","Internal pdftest.pdf exists: "+ file11.exists());
-                        Log.d("doff-pdf",MainActivity.self.getFilesDir().toString());
-
-                        FileManager.listAllFilesInExternalDirectory(MainActivity.self);
-                        FileManager.listAllFilesInInternalDirectory(MainActivity.self);
+                       index = ++index >= fileNames.length ? index=0 : index;
+                        if ( fileNames.length > 0 ) {
+                            PdfRender pdfRender = new PdfRender(MainActivity.self, imageView);
+                            pdfRender.render(fileNames[index]);
+                            textViewFileName.setText(Pdf.SpannableStringFileName(fileNames[index]));
+                        }
                     }
                 });
             }
+
+            buttonMinus = (Button) rootView.findViewById(R.id.button_pdf_minus);
+            if (buttonMinus != null) {
+                Log.d("doff-pdf","Create button listener.");
+
+                buttonMinus.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if ( fileNames.length > 0 ) {
+                            index = --index < 0 ? index=fileNames.length-1 : index;
+                            PdfRender pdfRender = new PdfRender(MainActivity.self, imageView);
+                            pdfRender.render(fileNames[index]);
+                            textViewFileName.setText(Pdf.SpannableStringFileName(fileNames[index]));
+                        }
+                    }
+                });
+            }
+
+            buttonHome = (Button) rootView.findViewById(R.id.button_pdf_home);
+            if (buttonHome != null) {
+                Log.d("doff-pdf","Create button listener.");
+
+                buttonHome.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if ( fileNames.length > 0 ) {
+                            index = 0;
+                            PdfRender pdfRender = new PdfRender(MainActivity.self, imageView);
+                            pdfRender.render(fileNames[index]);
+                            textViewFileName.setText(Pdf.SpannableStringFileName(fileNames[index]));
+                        }
+                    }
+                });
+            }
+
+            imageView = (ImageView) rootView.findViewById(R.id.imageViewPdf);
+
             return rootView;
         }
     }
@@ -1703,7 +1856,6 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
 
         private static final String ARG_SECTION_NUMBER = "section_number";
 
-        private  TextView textViewHeader = null;
         private  Button buttonSend = null;
 
         public FragmentEmail() {
@@ -1718,16 +1870,8 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
             return fragment;
         }
 
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
+        @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_email, container, false);
-
-
-            this.textViewHeader = (TextView) rootView.findViewById(R.id.email_pretext);
-            if ( textViewHeader != null ) {
-                this.textViewHeader.setText(getString(R.string.email_pretext));
-            }
 
             this.buttonSend = (Button) rootView.findViewById(R.id.button_email_send);
             if (this.buttonSend != null ) {
@@ -1747,11 +1891,8 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
 
         private static final String ARG_SECTION_NUMBER = "section_number";
 
-        private  Button buttonReadFromFile = null;
-        private  Button buttonWriteToFile = null;
         private  Button buttonReadGPS = null;
         private boolean doRestart = false;
-        private  TextView textViewHeader = null;
         private  TextView textViewLatitude = null;
         private  TextView textViewLongitude = null;
         private  TextView textViewPlace = null;
@@ -1770,27 +1911,29 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
 
         private void onClickButtonReadGPS()
         {
-            Log.d("doff-main","askToOnLocation: " + MainActivity.self.tracker.isLocationEnabled());
+            GPS gps = MainActivity.self.chimneyManager.gps;
+
+            Log.d("doff-main","askToOnLocation: " + gps.tracker.isLocationEnabled());
 
             if ( doRestart )
                 MainActivity.self.restartApp();
 
-            if( !MainActivity.self.tracker.isLocationEnabled() )
+            if( !gps.tracker.isLocationEnabled() )
             {
                 Log.d("doff-main","askToOnLocation");
-                MainActivity.self.tracker.askToOnLocation();
+                gps.tracker.askToOnLocation();
                 doRestart = true;
                 buttonReadGPS.setText("Restart App");
                 return;
             }
-            double latitude = MainActivity.self.tracker.getLatitude();
-            double longitude = MainActivity.self.tracker.getLongitude();
-            MainActivity.self.latitudeLongitude = String.format("[%f,%f]", latitude,longitude);
-            this.textViewLatitude.setText(getString(R.string.gps_latitude)+ " " + String.format("%f", latitude));
-            this.textViewLongitude.setText(getString(R.string.gps_longitude)+ " " + String.format("%f", longitude));
+            double latitude = gps.tracker.getLatitude();
+            double longitude =gps.tracker.getLongitude();
+            gps.latitudeLongitude = String.format("[%f,%f]", latitude,longitude);
+            this.textViewLatitude.setText(gps.BuildTextLongitudeLatitude(false, false, latitude));
+            this.textViewLongitude.setText(gps.BuildTextLongitudeLatitude(false, true, longitude));
             Log.d("doff-main","Update gps");
-            String addres= MainActivity.self.tracker.getCompleteAddressString(latitude,longitude);
-            this.textViewPlace.setText(addres);
+            String addres= gps.tracker.getCompleteAddressString(latitude,longitude).replace(',', '\n');
+            textViewPlace.setText(gps.BuildTextPlace( addres ));
             /*
             {
             double latitude=tracker.getLatitude();
@@ -1806,13 +1949,11 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_gps, container, false);
+            GPS gps = MainActivity.self.chimneyManager.gps;
 
             buttonReadGPS = (Button) rootView.findViewById(R.id.button_read_gps);
             if (buttonReadGPS != null) {
                 Log.d("doff-main","Create button listener.");
-                //buttonReadGPS.getBackground().setColorFilter(0xFFFF0000, PorterDuff.Mode.MULTIPLY);
-                buttonReadGPS.setBackgroundColor(0xFF0000FF);
-                buttonReadGPS.setTextColor(0xFFFFFFFF);
                 buttonReadGPS.setOnClickListener( new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -1820,47 +1961,165 @@ public class MainActivity extends AppCompatActivity implements Bluetooth.Communi
                     }
                 });
             }
-            this.textViewHeader = (TextView) rootView.findViewById(R.id.gps_textview_pretext);
-            this.textViewHeader.setText(getString(R.string.gps_pretext));
-            this.textViewLatitude = (TextView) rootView.findViewById(R.id.gps_textview_latitude);
-            this.textViewLatitude.setText(getString(R.string.gps_latitude)+ " ?");
-            this.textViewLongitude = (TextView) rootView.findViewById(R.id.gps_textview_longitude);
-            this.textViewLongitude.setText(getString(R.string.gps_longitude)+ " ?");
-            this.textViewPlace = (TextView) rootView.findViewById(R.id.gps_textview_place);
 
-            buttonReadFromFile = (Button) rootView.findViewById(R.id.button_read_from_file);
-            if (buttonReadFromFile != null) {
-                Log.d("doff-main","Create button listener: buttonReadFromFile");
-                //buttonReadGPS.getBackground().setColorFilter(0xFFFF0000, PorterDuff.Mode.MULTIPLY);
+            textViewLongitude = (TextView) rootView.findViewById(R.id.gps_textview_longitude);
+            textViewLongitude.setText(gps.BuildTextLongitudeLatitude(true, true, 0));
 
-                buttonReadFromFile.setOnClickListener( new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        String txt = FileManager.Read(MainActivity.self,"position.txt");
-                        Toast toast = Toast.makeText(MainActivity.self, txt, Toast.LENGTH_SHORT);
-                        toast.show();
-                    }
-                });
-            }
+            textViewLatitude = (TextView) rootView.findViewById(R.id.gps_textview_latitude);
+            textViewLatitude.setText(gps.BuildTextLongitudeLatitude(true, false, 0));
 
-            buttonWriteToFile = (Button) rootView.findViewById(R.id.button_save_to_file);
-            if (buttonWriteToFile != null) {
-                Log.d("doff-main","Create button listener: buttonWriteToFile");
-                //buttonReadGPS.getBackground().setColorFilter(0xFFFF0000, PorterDuff.Mode.MULTIPLY);
-
-                buttonWriteToFile.setOnClickListener( new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        FileManager.WriteReadable(MainActivity.self,"position.txt",MainActivity.self.latitudeLongitude);
-                    }
-                });
-            }
+            textViewPlace = (TextView) rootView.findViewById(R.id.gps_textview_place);
+            textViewPlace.setText(gps.BuildTextPlace( "" ));
 
             return rootView;
         }
     }
+    public static class FragmentFiles extends Fragment  implements IChimney {
+        public String title() { return getString(R.string.files_title); }
+        public void init() {}
+
+        private static final String ARG_SECTION_NUMBER = "section_number";
+
+        private View rootView = null;
+        private ListViewAdapter_ listViewAdapter = null;
+        private ListView listView = null;
+        private Button buttonDelete = null;
+        private Button buttonMail = null;
+
+        public FragmentFiles() {
+        }
+
+        public static FragmentFiles newInstance(int sectionNumber) {
+            Log.d("doff-main","New fragment.");
+            final FragmentFiles fragment = new FragmentFiles();
+            Bundle args = new Bundle();
+            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+            fragment.setArguments(args);
+            return fragment;
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            rootView = inflater.inflate(R.layout.fragment_files, container, false);
+
+            buttonDelete = (Button) rootView.findViewById(R.id.buttonFilesDelete) ;
+            if ( buttonDelete != null ) {
+                buttonDelete.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        for (int i = 0; i < arrayColumn1.length; i++) {
+                            if ( arrayColumn1[i] == true ) {
+                                FileManager.deleteExternalFile(MainActivity.self, arrayColumn2[i]);
+                            }
+                        }
+                        fillListView();
+                        listViewAdapter = new ListViewAdapter_();
+                        listView.setAdapter(listViewAdapter);
+                    }
+                });
+            }
+
+            buttonMail = (Button) rootView.findViewById(R.id.buttonFilesMail) ;
+            if ( buttonMail != null ) {
+                buttonMail.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        for (int i = 0; i < arrayColumn1.length; i++) {
+                            if ( arrayColumn1[i] == true ) {
+                                //FileManager.deleteExternalFile(MainActivity.self, arrayColumn2[i]);
+                            }
+                        }
+                    }
+                });
+            }
+
+            fillListView();
+            listViewAdapter = new ListViewAdapter_();
+            listView = (ListView) rootView.findViewById(R.id.listViewFiles);
+            listView.setAdapter(listViewAdapter);
+
+            return rootView;
+        }
+
+        private void fillListView() {
+            arrayColumn2 = FileManager.listAllFileNamesInExternalDirectory(MainActivity.self);
+            arrayColumn1 = new Boolean[arrayColumn2.length];
+            for (int i = 0; i < arrayColumn1.length; i++) {
+                arrayColumn1[i]=false;
+            }
+        }
+        private static String[] arrayColumn2 =
+                new String[]{"Text1","Text2","Text3","Text4"
+                        ,"Text5","Text6","Text7","Text8","Text9","Text10"
+                        ,"Text11","Text12","Text13","Text14","Text15"
+                        ,"Text16","Text17","Text18","Text19","Text20"
+                        ,"Text21","Text22","Text23","Text24"};
+        private static Boolean[] arrayColumn1 =
+                new Boolean[]{false,false,false,false
+                        ,false,false,false,false,false,false
+                        ,false,false,false,false,false
+                        ,false,false,false,false,false
+                        ,false,false,false,false};
+        private static class ListViewAdapter_ extends BaseAdapter {
+
+            @Override public int getCount() {
+                // TODO Auto-generated method stub
+                if(arrayColumn2 != null && arrayColumn2.length != 0){
+                    return arrayColumn2.length;
+                }
+                return 0;
+            }
+            @Override public Object getItem(int position) {
+                // TODO Auto-generated method stub
+                return arrayColumn2[position];
+            }
+            @Override public long getItemId(int position) {
+                // TODO Auto-generated method stub
+                return position;
+            }
+            @Override public View getView(int position, View convertView, ViewGroup parent) {
+                //ViewHolder holder = null;
+                final ViewHolder holder;
+                if (convertView == null) {
+
+                    holder = new ViewHolder();
+                    LayoutInflater inflater = MainActivity.self.getLayoutInflater();
+                    convertView = inflater.inflate(R.layout.listview_item_files, null);
+                    holder.textView1 = (TextView) convertView.findViewById(R.id.textViewFiles);
+                    holder.checkBox1 = (CheckBox) convertView.findViewById(R.id.checkBoxFiles);
+                    holder.checkBox1.setText("");
+                    convertView.setTag(holder);
+
+                } else {
+
+                    holder = (ViewHolder) convertView.getTag();
+                }
+
+                holder.ref = position;
+
+                holder.textView1.setText(arrayColumn2[position]);
+                holder.checkBox1.setChecked(arrayColumn1[position]);
+                holder.checkBox1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                        arrayColumn1[holder.ref] = b;
+                    }
+                });
+
+                return convertView;
+            }
+
+            private class ViewHolder {
+                TextView textView1;
+                CheckBox checkBox1;
+                int ref;
+            }
 
 
+        }
+    }
 
     class ChimneyThread extends Thread {
 

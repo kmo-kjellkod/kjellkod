@@ -17,6 +17,7 @@ import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
 
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,7 +34,7 @@ public class Chimney {
     private Sensors sensors = null;
     private Actuators actuators = null;
     private Settings settings = null;
-    private LeakageMeasurementData lmd = null;
+    public LeakageMeasurementData lmd = null;
     private List<LeakageMeasurementData> listLMD = null;
 
     public Chimney(MainActivity mainMctivity, Sensors sensors, Actuators actuators, Settings settings) {
@@ -85,7 +86,7 @@ public class Chimney {
         return lengthR;
     }
 
-    // Side in mm
+    // Side in mmv
     public Range<Double> rangeSide;
     public int sideA;
     public int sideB;
@@ -97,7 +98,7 @@ public class Chimney {
         sideB = (int) (seekBar2value(rangeSide,progress));
         return sideB;
     }
-    // Radius in mm
+    // Radius in mmv
     public Range<Double> rangeRadius;
     public int radius;
     public int setRadius(int progress) {
@@ -165,16 +166,16 @@ public class Chimney {
     }
     public SpannableString SSChimneyChannelRectangle() {
         String s0 = space+"Fyrkantig rökkanal\n";
-        String s1 = space+"Längd: " + String.format("%.1s",lengthR) + " m\n";
-        String s2 = space+"Sida A: " + sideA + " mm\n";
-        String s3 = space+"Sida B: " + sideB + " mm\n";
+        String s1 = space+"Längd: " + String.format("%.1f",lengthR) + " m\n";
+        String s2 = space+"Sida A: " + sideA + " mmv\n";
+        String s3 = space+"Sida B: " + sideB + " mmv\n";
         String s = s0+s1+s2+s3;
         SpannableString ss = new SpannableString(s);
         return ss;
     }
     public SpannableString SSChimneyChannelCircle() {
         String s0 = space+"Rund rökkanal\n";
-        String s1 = space+"Radie: " + radius + " mm\n";
+        String s1 = space+"Radie: " + radius + " mmv\n";
         String s2 = space+"Längd: " + String.format("%.1f", lengthC) + " m\n";
         String s = s0+s1+s2;
         SpannableString ss = new SpannableString(s);
@@ -260,7 +261,13 @@ public class Chimney {
 
     public void leakLmdResetUUID() { this.lmd.uuid="";}
     public void leakLmdInit() {
+        this.lmd = new LeakageMeasurementData();
         this.lmd.uuid = UUID.randomUUID().toString();
+        //Log.d("doff-file", "UUID = "+ this.lmd.uuid);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        this.lmd.date = sdf.format(new Date());
+        this.lmd.author = settings.Sweeper;
+        this.lmd.housePropertyId = settings.HousePropertyId;
     }
     public void leakLmdAdd() {
 
@@ -268,6 +275,8 @@ public class Chimney {
     public boolean leakLmdSave() {
         for (int i = 0; i < listLMD.size(); i++) {
             if (listLMD.get(i).uuid.compareTo(lmd.uuid) == 0) {
+                //Log.d("doff-file", "listLMD.get(i).uuid="+listLMD.get(i).uuid);
+                //Log.d("doff-file", "lmd.uuid="+lmd.uuid);
                 return false;
             }
         }
@@ -289,6 +298,7 @@ public class Chimney {
             FileManager.WriteReadableExternalStorage(activity,fileName,json);
         } catch (Exception e) {
             Log.d("doff-file","exception=" + e.getMessage());
+            e.printStackTrace();
         }
         Log.d("doff-file","write leak2file done");
     }
@@ -307,6 +317,7 @@ public class Chimney {
                 Log.d("doff-file", "file2leak: settings: " + settings.Bluetooth_Mac);
            } catch (Exception e) {
                 Log.e("doff-file", e.getMessage());
+                e.printStackTrace();
            }
         }
     }

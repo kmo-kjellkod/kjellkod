@@ -16,16 +16,30 @@
     <string name="battery_button_snackbar_stop">Stopp</string>
     <string name="battery_button_snackbar_text">Batteritest pågår</string>
 
+    <string name="bt_title">Bluetooth</string>
+    <string name="bt_pretext_paired_devices">Kopplade enheter</string>
+    <string name="bt_action">Bluetooth</string>
+    <string name="bt_send">Send</string>
+    <string name="bt_received">Received</string>
+
+    <string name="btc_title">Seriell kommunikation</string>
+    <string name="bt_pretext_serial_communication">Bluetooth Communication</string>
 
     <string name="extra_title">Innehåll Extra</string>
     <string name="extra_button11">Inställningar</string>
     <string name="extra_button12">Blåtand</string>
     <string name="extra_button21">Email</string>
     <string name="extra_button22">GPS</string>
-    <string name="extra_button31">-</string>
-    <string name="extra_button32">-</string>
+    <string name="extra_button31">PDF</string>
+    <string name="extra_button32">Filer</string>
     <string name="extra_button41">-</string>
     <string name="extra_button42">-</string>
+
+    <string name="files_title">Filer</string>
+    <string name="files_button_delete">Ta bort</string>
+    <string name="files_button_pdf">PDF</string>
+    <string name="files_button_mail">Mail</string>
+
 
     <string name="house_property_title">Fastighet</string>
     <string name="house_property_id">Fastighetsbeteckning</string>
@@ -83,11 +97,20 @@
     <string name="manual_button_snackbar_stop">Stopp</string>
     <string name="manual_button_snackbar_text">Manuell styrning pågår</string>
 
+    <string name="pdf_title">PDF</string>
+    <string name="pdf_pretext">PDF</string>
+    <string name="pdf_button_plus">&#9650;</string>
+    <string name="pdf_button_minus">&#9660;</string>
+    <string name="pdf_button_home">H</string>
 
     <string name="pressure_title">Provtryckning</string>
     <string name="pressure_length">Längd</string>
     <string name="pressure_actuator">Fläktmotor</string>
-    <string name="pressure_pressure">Ttyck</string>
+    <string name="pressure_pressure">Tryck</string>
+    <string name="pressure_button_start">Start</string>
+    <string name="pressure_button_stop">Stopp</string>
+    <string name="pressure_button_snackbar_stop">Stopp</string>
+    <string name="pressure_button_snackbar_text">Provtryckning pågår</string>
 
     <string name="settings_title">Inställningar</string>
 
@@ -101,22 +124,18 @@
     <string name="gps_button_read_from_file">Läs från fil</string>
     <string name="gps_action">GPS</string>
 
-    <string name="bt_title">Bluetooth</string>
-    <string name="bt_pretext_paired_devices">Bluetooth Paired Devices</string>
-    <string name="bt_action">Bluetooth</string>
-    <string name="bt_send">Send</string>
-    <string name="bt_received">Received</string>
-
-    <string name="btc_title">Seriell kommunikation</string>
-    <string name="bt_pretext_serial_communication">Bluetooth Communication</string>
-
-    <string name="pdf_title">PDF</string>
-    <string name="pdf_pretext">PDF</string>
-    <string name="button_pdf_test">Test PDF</string>
 
     <string name="email_title">EMAIL</string>
     <string name="email_pretext">Send email</string>
     <string name="email_send">kjellkod.kurs@gmail.com</string>
+
+
+    <string name="Company">Företag</string>
+    <string name="Date">Datum</string>
+    <string name="HousePropertyId">Fastighetsbeteckning</string>
+    <string name="LocationGPS">GPS-lokalisering</string>
+    <string name="Sweeper">Sotare</string>
+
 
     <string name="title">Ej definierad titel</string>
     <!-- TODO: Remove or change this placeholder text -->

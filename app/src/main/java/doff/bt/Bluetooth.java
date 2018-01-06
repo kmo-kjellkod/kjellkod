@@ -66,7 +66,7 @@ public class Bluetooth {
             new ConnectThread(device).start();
         }catch (Exception e) {
             Log.e("doff-bt", e.getMessage());
-            Toast toast = Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG);
+            Toast toast = Toast.makeText(activity, e.getMessage(), Toast.LENGTH_SHORT);
             toast.show();
         }
 

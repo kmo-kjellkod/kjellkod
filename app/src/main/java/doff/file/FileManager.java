@@ -23,6 +23,64 @@ public class FileManager {
 
     static final int READ_BLOCK_SIZE = 100;
 
+    public static boolean deleteExternalFile(Activity activity, String fileName) {
+        String path = activity.getExternalFilesDir(null)+ "/" + fileName;
+        File file = new File(path);
+        return file.delete();
+    }
+    public static boolean isExternalFileExisting(Activity activity, String fileName) {
+        String path = activity.getExternalFilesDir(null)+ "/" + fileName;
+        File file = new File(path);
+        return file.exists();
+    }
+    public static File[] listAllFilesInExternalDirectory(Activity activity) {
+        String path = activity.getExternalFilesDir(null).toString();
+        //String path = Environment.getExternalStorageDirectory().toString();
+        Log.d("doff-file", "getExternalStorageDirectory: " + path);
+        File directory = new File(path);
+        File[] files = directory.listFiles();
+        Log.d("Files", "Size: "+ files.length);
+        for (int i = 0; i < files.length; i++)
+        {
+            Log.d("doff-file", "FileName:" + files[i].getName());
+        }
+
+        return files;
+    }
+    public static String[] listAllFileNamesInExternalDirectory(Activity activity) {
+        String path = activity.getExternalFilesDir(null).toString();
+        File directory = new File(path);
+        File[] files = directory.listFiles();
+        String[] fileNames = new String[files.length];
+        Log.d("Files", "Size: "+ files.length);
+        for (int i = 0; i < files.length; i++)
+        {
+            fileNames[i] = files[i].getName();
+        }
+
+        return fileNames;
+    }
+    public static String[] listAllPdfFileNamesInExternalDirectory(Activity activity) {
+        String path = activity.getExternalFilesDir(null).toString();
+        File directory = new File(path);
+        File[] files = directory.listFiles();
+        int n_pdf = 0;
+        for (int i = 0; i < files.length; i++) {
+            if ( files[i].getName().endsWith("pdf") ) {
+                n_pdf++;
+            }
+        }
+        String[] fileNames = new String[n_pdf];
+        Log.d("Files pdf", "Size: "+ n_pdf);
+        int j = 0;
+        for (int i = 0; i <files.length; i++) {
+            if ( files[i].getName().endsWith("pdf") ) {
+                fileNames[j++] = files[i].getName();
+            }
+        }
+
+        return fileNames;
+    }
     public static void WriteReadableExternalStorage(Activity activity, String fileName, String txt) {
         try {
             String path = activity.getExternalFilesDir(null)+ "/" + fileName;
@@ -124,21 +182,6 @@ public class FileManager {
         }
         return txt;
     }
-
-    public static File[] listAllFilesInExternalDirectory(Activity activity) {
-        String path = activity.getExternalFilesDir(null).toString();
-        //String path = Environment.getExternalStorageDirectory().toString();
-        Log.d("doff-file", "getExternalStorageDirectory: " + path);
-        File directory = new File(path);
-        File[] files = directory.listFiles();
-        Log.d("Files", "Size: "+ files.length);
-        for (int i = 0; i < files.length; i++)
-        {
-            Log.d("doff-file", "FileName:" + files[i].getName());
-        }
-
-        return files;
-    }
     public static File[] listAllFilesInInternalDirectory(Activity activity) {
         String path = activity.getFilesDir().toString();
         Log.d("doff-file", "getInternalStorageDirectory: " + path);
@@ -152,21 +195,28 @@ public class FileManager {
 
         return files;
     }
+    public static String[] listAllFileNamesInInternalDirectory(Activity activity) {
+        String path = activity.getFilesDir().toString();
+        File directory = new File(path);
+        File[] files = directory.listFiles();
+        String[] fileNames = new String[files.length];
+        Log.d("Files", "Size: "+ files.length);
+        for (int i = 0; i < files.length; i++)
+        {
+            fileNames[i] = files[i].getName();
+        }
 
-    public static boolean isExternalFileExisting(Activity activity, String fileName) {
-        String path = activity.getExternalFilesDir(null)+ "/" + fileName;
-        File file = new File(path);
-        return file.exists();
+        return fileNames;
     }
-    public static String fileNameWithDate(String fileName )
-    {
+
+    public static String fileNameWithDate(String fileName ) {
         String newFileName = "";
         Date date = new Date();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyMMdd_HHmmSS");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yy-MM-dd HH:mm:SS");
 
         String[] a = fileName.split("\\.");
+        newFileName += simpleDateFormat.format(date)+ " ";
         newFileName += a[0];
-        newFileName += simpleDateFormat.format(date);
         newFileName += "." + a[1];
         return newFileName;
     }
