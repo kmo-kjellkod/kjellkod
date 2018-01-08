@@ -13,7 +13,7 @@
         android:layout_marginRight="10sp"
         android:layout_height="wrap_content"
         android:layout_marginTop="10sp"
-        android:text="Start"
+        android:text="@string/pressure_button_start"
         android:textColor="@color/whiteSmoke"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
